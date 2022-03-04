@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -57,6 +58,13 @@ margin-top: 10px;
 margin-bottom: -20px;
 `
 const LoginScreen = () => {
+
+    // Getting Email 
+   const [Email,setEmail] = useState("");
+   
+   // Getting PassWord 
+   const [Pass,setPass] = useState('');
+
     return (
         <Container>
             <Label>EmoTool</Label>
@@ -67,11 +75,22 @@ const LoginScreen = () => {
             <Wrapper style={{ marginLeft: 110 }}>
                 <RowContainer>
                     <InputLabel>Email</InputLabel>
-                    <Input type="text" />
+                    <Input type="text" 
+                    required
+                    value = {Email}
+                    onChange= {(e)=>{
+                        setEmail(e.target.value)}
+                    }
+                    />
                 </RowContainer>
                 <RowContainer>
                     <InputLabel>Password</InputLabel>
-                    <Input type="text" />
+                    <Input type="text" 
+                    required
+                    value = {Pass}
+                    onChange= {(e)=>{
+                        setPass(e.target.value)}
+                    }/>
                 </RowContainer>
             </Wrapper>
             <Button>Login</Button>
