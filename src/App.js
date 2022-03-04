@@ -2,6 +2,7 @@ import './App.css';
 import LoginScreen from './pages/LoginScreen';
 import {BrowserRouter as Router,Route,Routes} from 'react-router-dom'
 import SelectEmotionFilter from './pages/SelectEmotionFilter';
+import GraphByTime from './pages/GraphByTime';
 function App() {
   return (
     <Router>
@@ -14,6 +15,7 @@ function App() {
            
            <Route path='/SelectEmotionFilter' element={<SelectEmotionFilter/>}/>
 
+            <Route path='/GraphByTime' element={<GraphByTime/>}/>
           </Routes>
         </div>
      
