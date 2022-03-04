@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -73,7 +74,10 @@ const LoginScreen = () => {
                     <Input type="text" />
                 </RowContainer>
             </Wrapper>
+            <Link to="/SelectEmotionFilter">
             <Button>Login</Button>
+            </Link>
+           
         </Container>
     );
 }
