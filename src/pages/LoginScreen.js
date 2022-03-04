@@ -74,9 +74,8 @@ const LoginScreen = () => {
                     <Input type="text" />
                 </RowContainer>
             </Wrapper>
-            <Link to="/SelectEmotionFilter">
             <Button>Login</Button>
-            </Link>
+            
            
         </Container>
     );
