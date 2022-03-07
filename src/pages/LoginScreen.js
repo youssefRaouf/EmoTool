@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-
+import { authentication } from './Firebase-config';
+import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
@@ -65,6 +66,14 @@ const LoginScreen = () => {
    // Getting PassWord 
    const [Pass,setPass] = useState('');
 
+    const signIn = () => {
+        const provider = new TwitterAuthProvider();
+        signInWithPopup(authentication, provider).then((res) => {
+            console.log(res)
+        }).catch(err => {
+            console.log("error", err)
+        })
+    }
     return (
         <Container>
             <Label>EmoTool</Label>
@@ -93,9 +102,7 @@ const LoginScreen = () => {
                     }/>
                 </RowContainer>
             </Wrapper>
-            <Button>Login</Button>
-            
-           
+            <Button onClick={signIn}>Login</Button>
         </Container>
     );
 }

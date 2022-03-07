@@ -2,6 +2,7 @@
   "name": "Emotool",
   "version": "1.0.0",
   "manifest_version": 2,
+  "content_security_policy":"https://apis.google.com",
   "description": "Emotool",
   "icons": {
       "512": "logo512.png"
