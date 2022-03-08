@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import SignIn from '../LogicHelper/SignIn';
+import { authentication } from '../AuthHelper/Firebase-config';
+import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
+import GetTweets from '../LogicHelper/GetTweets.js';
 
 
 const Container = styled.div`
@@ -62,7 +64,30 @@ margin-bottom: -20px;
 
 const LoginScreen = () => {
 
+    const signIn= ()=>
+    {
+        
+    const provider = new TwitterAuthProvider();
+    signInWithPopup(authentication, provider).then((res) => {
+         
+        
+       
+        console.log(res['user'].accessToken);
 
+        var response = GetTweets({accessToken:"AAAAAAAAAAAAAAAAAAAAAEDmZwEAAAAAKprbLSn%2BoS3cqzzFnQ5SFatPSp0%3DiQN4FTV44eE5fLrjxazxZ4hN7Se7RKPFQ4HYestJzKhuDm3yBY",
+        userId: '339933405',
+            max_results:20})
+
+        console.log(response)
+        return (res['user'].accessToken)
+        
+    }).catch(err => {
+        console.log("error", err)
+        return ( err);
+    })
+    
+    }
+    
     return (
         <Container>
             <Label>EmoTool</Label>
@@ -71,7 +96,7 @@ const LoginScreen = () => {
                 <LoginMessage>Login Into Your Twitter Account</LoginMessage>
             </div>
            
-            <Button onClick={SignIn}>Login</Button>
+            <Button onClick={signIn}>Login</Button>
         </Container>
     );
 }
