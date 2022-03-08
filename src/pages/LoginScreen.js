@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { authentication } from './Firebase-config';
-import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
+import SignIn from '../LogicHelper/SignIn';
+
+
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
@@ -58,22 +59,10 @@ margin-left: 60px;
 margin-top: 10px;
 margin-bottom: -20px;
 `
+
 const LoginScreen = () => {
 
-    // Getting Email 
-   const [Email,setEmail] = useState("");
-   
-   // Getting PassWord 
-   const [Pass,setPass] = useState('');
 
-    const signIn = () => {
-        const provider = new TwitterAuthProvider();
-        signInWithPopup(authentication, provider).then((res) => {
-            console.log(res)
-        }).catch(err => {
-            console.log("error", err)
-        })
-    }
     return (
         <Container>
             <Label>EmoTool</Label>
@@ -81,28 +70,8 @@ const LoginScreen = () => {
                 <img src={require('../assets/twitter-logo.png')} />
                 <LoginMessage>Login Into Your Twitter Account</LoginMessage>
             </div>
-            <Wrapper style={{ marginLeft: 110 }}>
-                <RowContainer>
-                    <InputLabel>Email</InputLabel>
-                    <Input type="text" 
-                    required
-                    value = {Email}
-                    onChange= {(e)=>{
-                        setEmail(e.target.value)}
-                    }
-                    />
-                </RowContainer>
-                <RowContainer>
-                    <InputLabel>Password</InputLabel>
-                    <Input type="text" 
-                    required
-                    value = {Pass}
-                    onChange= {(e)=>{
-                        setPass(e.target.value)}
-                    }/>
-                </RowContainer>
-            </Wrapper>
-            <Button onClick={signIn}>Login</Button>
+           
+            <Button onClick={SignIn}>Login</Button>
         </Container>
     );
 }
