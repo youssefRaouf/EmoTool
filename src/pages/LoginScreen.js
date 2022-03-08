@@ -1,38 +1,20 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { authentication } from '../AuthHelper/Firebase-config';
+import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
+import { getTweets } from '../Services/api.js';
+import { useNavigate } from "react-router-dom";
+
 
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
-`
-const InputLabel = styled.div`
-width: 90px;
-font-size: 20px;
 `
 const LoginMessage = styled.div`
 font-size: 20px;
 margin-top: -20px;
 margin-bottom: -20px;
 `
-
-const Wrapper = styled.div`
-margin-top:20px;
-`
-
-const Input = styled.input`
-width: 348px;
-height: 32px;
-border-radius: 10px;
-`
-
-const RowContainer = styled.div`
-display: flex;
-flex-direction: row;
-margin-top:25px;
-align-items: center;
-`
-
 const Button = styled.div`
 background-color: #2caae1;
 font-size: 20px;
@@ -56,46 +38,45 @@ font-size: 20px;
 margin-left: 60px;
 margin-top: 10px;
 margin-bottom: -20px;
+align-self: flex-start;
 `
+
 const LoginScreen = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null)
+    const [tweets, setTweets] = useState([])
+    const signIn = () => {
+        const provider = new TwitterAuthProvider();
+        signInWithPopup(authentication, provider).then(async (res) => {
+            const userId = res.user.providerData[0].uid
+            const response = await getTweets({
+                userId,
+            })
+            setTweets(response)
+            setUser(res.user)
+        }).catch(err => {
+            console.log("error", err)
+        })
+    }
 
-    // Getting Email 
-   const [Email,setEmail] = useState("");
-   
-   // Getting PassWord 
-   const [Pass,setPass] = useState('');
-
+    useEffect(() => {
+        if (user) {
+            navigate('/SelectEmotionFilter', {
+                state: {
+                    tweets
+                }
+            })
+        }
+    }, [user, navigate, tweets])
     return (
         <Container>
             <Label>EmoTool</Label>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <img src={require('../assets/twitter-logo.png')} />
+                <img alt="twitter-logo" src={require('../assets/twitter-logo.png')} />
                 <LoginMessage>Login Into Your Twitter Account</LoginMessage>
             </div>
-            <Wrapper style={{ marginLeft: 110 }}>
-                <RowContainer>
-                    <InputLabel>Email</InputLabel>
-                    <Input type="text" 
-                    required
-                    value = {Email}
-                    onChange= {(e)=>{
-                        setEmail(e.target.value)}
-                    }
-                    />
-                </RowContainer>
-                <RowContainer>
-                    <InputLabel>Password</InputLabel>
-                    <Input type="text" 
-                    required
-                    value = {Pass}
-                    onChange= {(e)=>{
-                        setPass(e.target.value)}
-                    }/>
-                </RowContainer>
-            </Wrapper>
-            <Button>Login</Button>
-            
-           
+
+            <Button onClick={signIn}>Login</Button>
         </Container>
     );
 }
