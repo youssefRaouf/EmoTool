@@ -19,7 +19,7 @@ async function getRequest() {
  var to_return ;
  await fetch(endpointURL,{
     method:"GET",
-
+    mode:'no-cors',
     headers: {
       "User-Agent": "v2TweetsJS",
       authorization: `Bearer ${token}`,

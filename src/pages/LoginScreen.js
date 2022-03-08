@@ -72,7 +72,7 @@ const LoginScreen = () => {
          
         
        
-        console.log(res['user'].accessToken);
+        //console.log(res['user'].accessToken);
 
         var response = GetTweets({accessToken:"AAAAAAAAAAAAAAAAAAAAAEDmZwEAAAAAKprbLSn%2BoS3cqzzFnQ5SFatPSp0%3DiQN4FTV44eE5fLrjxazxZ4hN7Se7RKPFQ4HYestJzKhuDm3yBY",
         userId: '339933405',
