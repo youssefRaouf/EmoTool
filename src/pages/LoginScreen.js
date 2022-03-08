@@ -1,42 +1,20 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { authentication } from '../AuthHelper/Firebase-config';
 import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
-import GetTweets from '../LogicHelper/GetTweets.js';
+import { getTweets } from '../Services/api.js';
+import { useNavigate } from "react-router-dom";
 
 
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
 `
-const InputLabel = styled.div`
-width: 90px;
-font-size: 20px;
-`
 const LoginMessage = styled.div`
 font-size: 20px;
 margin-top: -20px;
 margin-bottom: -20px;
 `
-
-const Wrapper = styled.div`
-margin-top:20px;
-`
-
-const Input = styled.input`
-width: 348px;
-height: 32px;
-border-radius: 10px;
-`
-
-const RowContainer = styled.div`
-display: flex;
-flex-direction: row;
-margin-top:25px;
-align-items: center;
-`
-
 const Button = styled.div`
 background-color: #2caae1;
 font-size: 20px;
@@ -60,42 +38,44 @@ font-size: 20px;
 margin-left: 60px;
 margin-top: 10px;
 margin-bottom: -20px;
+align-self: flex-start;
 `
 
 const LoginScreen = () => {
-
-    const signIn= ()=>
-    {
-        
-    const provider = new TwitterAuthProvider();
-    signInWithPopup(authentication, provider).then((res) => {
-         
-        
-       
-        //console.log(res['user'].accessToken);
-
-        var response = GetTweets({accessToken:"AAAAAAAAAAAAAAAAAAAAAEDmZwEAAAAAKprbLSn%2BoS3cqzzFnQ5SFatPSp0%3DiQN4FTV44eE5fLrjxazxZ4hN7Se7RKPFQ4HYestJzKhuDm3yBY",
-        userId: '339933405',
-            max_results:20})
-
-        console.log(response)
-        return (res['user'].accessToken)
-        
-    }).catch(err => {
-        console.log("error", err)
-        return ( err);
-    })
-    
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null)
+    const [tweets, setTweets] = useState([])
+    const signIn = () => {
+        const provider = new TwitterAuthProvider();
+        signInWithPopup(authentication, provider).then(async (res) => {
+            const userId = res.user.providerData[0].uid
+            const response = await getTweets({
+                userId,
+            })
+            setTweets(response)
+            setUser(res.user)
+        }).catch(err => {
+            console.log("error", err)
+        })
     }
-    
+
+    useEffect(() => {
+        if (user) {
+            navigate('/SelectEmotionFilter', {
+                state: {
+                    tweets
+                }
+            })
+        }
+    }, [user, navigate, tweets])
     return (
         <Container>
             <Label>EmoTool</Label>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <img src={require('../assets/twitter-logo.png')} />
+                <img alt="twitter-logo" src={require('../assets/twitter-logo.png')} />
                 <LoginMessage>Login Into Your Twitter Account</LoginMessage>
             </div>
-           
+
             <Button onClick={signIn}>Login</Button>
         </Container>
     );
