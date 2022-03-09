@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { authentication } from '../AuthHelper/Firebase-config';
-import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
+import {TwitterAuthProvider, signInWithPopup } from "firebase/auth";
 import { getTweets } from '../Services/api.js';
 import { useNavigate } from "react-router-dom";
+
 
 
 const Container = styled.div`
@@ -45,15 +46,43 @@ const LoginScreen = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null)
     const [tweets, setTweets] = useState([])
+
+    
+    
+  
+    
     const signIn = () => {
         const provider = new TwitterAuthProvider();
-        signInWithPopup(authentication, provider).then(async (res) => {
+        
+        signInWithPopup(authentication,provider).then(async (res) => {
+            
+            // Getting credentials
+            const credential = TwitterAuthProvider.credentialFromResult(res);
+            
+            // User Id
             const userId = res.user.providerData[0].uid
+
+            // Access Token
+            const accessToken= credential.accessToken;
+
+            // Secret Access Token
+            const accessTokenSecret =credential.secret; 
+
+
+            // Pass to get tweets            
             const response = await getTweets({
                 userId,
+                accessToken,
+               accessTokenSecret
+                
             })
             setTweets(response)
             setUser(res.user)
+
+          
+          
+            
+            
         }).catch(err => {
             console.log("error", err)
         })
@@ -61,6 +90,7 @@ const LoginScreen = () => {
 
     useEffect(() => {
         if (user) {
+            
             navigate('/SelectEmotionFilter', {
                 state: {
                     tweets
@@ -68,6 +98,7 @@ const LoginScreen = () => {
             })
         }
     }, [user, navigate, tweets])
+
     return (
         <Container>
             <Label>EmoTool</Label>
