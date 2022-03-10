@@ -6,6 +6,7 @@ import { getTweets } from '../Services/api.js';
 import { useNavigate } from "react-router-dom";
 
 
+
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
@@ -48,9 +49,19 @@ const LoginScreen = () => {
     const signIn = () => {
         const provider = new TwitterAuthProvider();
         signInWithPopup(authentication, provider).then(async (res) => {
+            // Getting credentials
+            const credential = TwitterAuthProvider.credentialFromResult(res);
+            // User Id
             const userId = res.user.providerData[0].uid
+            // Access Token
+            const accessToken = credential.accessToken;
+            // Secret Access Token
+            const accessTokenSecret = credential.secret;
+            // Pass to get tweets            
             const response = await getTweets({
                 userId,
+                accessToken,
+                accessTokenSecret
             })
             setTweets(response)
             setUser(res.user)
@@ -58,7 +69,6 @@ const LoginScreen = () => {
             console.log("error", err)
         })
     }
-
     useEffect(() => {
         if (user) {
             navigate('/SelectEmotionFilter', {
@@ -68,6 +78,7 @@ const LoginScreen = () => {
             })
         }
     }, [user, navigate, tweets])
+
     return (
         <Container>
             <Label>EmoTool</Label>

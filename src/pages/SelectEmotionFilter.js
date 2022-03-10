@@ -6,7 +6,7 @@ const SelectEmotionFilter = () => {
     return (
         <div className="EmotionCheckBox">
             <h1>Select Page</h1>
-            {tweets.map((tweet, i) => <div>tweet{i + 1} : {tweet.text}</div>)}
+            {tweets.map((tweet, i) => <div>tweet{i + 1} : {tweet}</div>)}
         </div>
     );
 }
