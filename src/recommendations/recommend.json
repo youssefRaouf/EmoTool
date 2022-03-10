@@ -1,0 +1,114 @@
+{
+    "Joy" : {
+        "advice" : 
+        [
+            "Live in the moment!" 
+            ,
+            "Joy is a powerful stress reliever! It releases tension and boosts our self-esteem. In addition, it can be passed on like a ball of energy that we pass to other people because we want to share it. Finally, joy can help us make decisions and act boldly and bravely… provided that we don’t get overenthusiastic and act without thinking!"
+        ] 
+        ,
+        "content" : 
+        [
+            "https://www.youtube.com/watch?v=ZbZSe6N_BXs"
+            ,
+            "https://twitter.com/memesmelody?lang=en"
+        ]
+    } 
+    ,
+    "Neutral" : {
+        "advice" : 
+        [
+            "Express your emotions; don’t let them build up, but talk about them to your friends, parents or write about them!"
+        ] 
+        ,
+        "content" :
+        [
+            "https://www.quora.com/How-can-I-get-better-at-expressing-my-emotions"
+        ]
+    }
+    ,
+    "Fear" : {
+        "advice" : 
+        ["Don't fear failure , fear being in the exact same place next year as you are today!" 
+            ,
+            "scared ? good. we don't grow when we stay at our comfort zone."
+            ,
+            "Talk about it. To help yourself, you can talk about the emotions you felt with a person you trust"
+            ,
+            "Do you think your fear is justified? If yes, that’s excellent, because it undoubtedly protected you from danger. If not, try to understand why you reacted that way."
+        ] 
+        ,
+        "content" : 
+        [
+            "https://www.youtube.com/watch?v=bb9g9mtDHZo"
+        ]
+    } 
+    ,
+    "Disgust" : {
+        "advice" : 
+        [
+            "Use the times when you feel disgusted to identify what triggered that feeling. By finding the source, you’ll get to know yourself better. Is your disgust justified? How can you better manage situations where it may appear?"
+        ] 
+        ,
+        "content" : 
+        [
+            "https://www.yourtango.com/experts/billmaiermsw/what-do-when-you-feel-absolute-disgust-toward-others-affects-your-mental-health"
+        ]
+    } 
+    ,
+    "Sad" : {
+        "advice" : 
+        [
+            "Not all storms comes to disrupt your life , some come to clear your path"
+        ] 
+        ,
+        "content" : [ 
+        "https://www.youtube.com/watch?v=h-3nt92UFZo"
+        ,
+        "https://www.quora.com/What-do-you-do-when-you-feel-sad-1"
+        ,
+        "https://www.youtube.com/watch?v=5rjtp2QLphE" 
+        ,
+        "https://www.youtube.com/watch?v=chE00kGtg48"
+        ,
+        "https://www.youtube.com/watch?v=8Su5VtKeXU8"
+        ,
+        "https://www.youtube.com/watch?v=DODLEX4zzLQ"
+
+        ]
+    } 
+    ,
+    "Surprise" : {
+        "advice" : 
+        [
+            "If you want something you have never had, you must be willing to do something you have never done"
+        ] 
+        ,
+        "content" : 
+        [
+            "https://www.blindexperiences.com/feeling-surprised"
+            ,
+            "https://www.wnycstudios.org/podcasts/takeaway/segments/surprise-unexpected-why-it-feels-good-and-why-its-good-us"
+            ,
+            "https://www.quora.com/Experiences-in-Life-What-recent-positive-surprise-have-you-experienced"
+        ]
+    } 
+    ,
+    "Anger" : {
+        "advice" : 
+        [
+            "Take Some Deep Breaths!"
+            ,
+            "Decompress and burn off your excess energy in activities such as running 🏃‍♀️ or skating. ⛸"
+        ] 
+        ,
+        "content" : 
+        [
+            "https://www.quora.com/What-are-the-ways-to-overcome-severe-anger?top_ans=316216233"
+            ,
+            "https://www.youtube.com/watch?v=BsVq5R_F6RA"
+            ,
+            "https://www.youtube.com/watch?v=wkse4PPxkk4"
+        ]
+    } 
+}
