@@ -1,0 +1,15 @@
+
+
+.visualization-div {
+    align-items: center;
+}
+.pie-chart-component-div{
+    height: 700px;
+    width: 700px;
+    margin-left: 50vh;
+    margin-top: 100px;
+}
+
+.line-div{
+    margin-top: 100px;
+}
