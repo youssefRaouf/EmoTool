@@ -5,8 +5,6 @@ import { TwitterAuthProvider, signInWithPopup } from "firebase/auth";
 import { getTweets } from '../Services/api.js';
 import { useNavigate } from "react-router-dom";
 
-
-
 const Container = styled.div`
 display: flex;
 flex-direction: column; 
@@ -44,7 +42,7 @@ align-self: flex-start;
 
 const LoginScreen = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState()
     const [tweets, setTweets] = useState([])
     const signIn = () => {
         const provider = new TwitterAuthProvider();
@@ -63,6 +61,9 @@ const LoginScreen = () => {
                 accessToken,
                 accessTokenSecret
             })
+            localStorage.setItem('user', JSON.stringify(res.user));
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('accessTokenSecret', accessTokenSecret);
             setTweets(response)
             setUser(res.user)
         }).catch(err => {
@@ -70,8 +71,14 @@ const LoginScreen = () => {
         })
     }
     useEffect(() => {
+        if (JSON.parse(localStorage.getItem('user'))) {
+            navigate('/Main')
+        }
+    }, [navigate])
+
+    useEffect(() => {
         if (user) {
-            navigate('/SelectEmotionFilter', {
+            navigate('/Main', {
                 state: {
                     tweets
                 }

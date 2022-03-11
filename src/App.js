@@ -1,9 +1,7 @@
 import './App.css';
 import LoginScreen from './pages/LoginScreen';
-// import {BrowserRouter as Router,Routes} from 'react-router-dom'
 import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
-import SelectEmotionFilter from './pages/SelectEmotionFilter';
-import GraphByTime from './pages/GraphByTime';
+import MainPage from './pages/MainPage';
 
 function App() {
   return (
@@ -14,13 +12,10 @@ function App() {
             <div style={{ width: 761, boxShadow: "2px 2px #b7b3b3" }}>
               <LoginScreen />
             </div>} />
-
-          <Route path='/SelectEmotionFilter' element={
+          <Route path='/Main' element={
             <div style={{ width: 761, boxShadow: "2px 2px #b7b3b3" }}>
-              <SelectEmotionFilter />
+              <MainPage />
             </div>} />
-
-          <Route path='/GraphByTime' element={<GraphByTime />} />
         </Routes>
       </div>
 
