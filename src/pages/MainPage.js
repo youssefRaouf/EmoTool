@@ -184,6 +184,8 @@ const MainPage = () => {
                 <LogoutBtn onClick={logout}>Logout</LogoutBtn>
             </HeaderContainer>
             {tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
+            {tab===1 && <div>Put filters here</div>}
+            {tab===2 && <div>Put status here</div>}
         </div>
     );
 }
