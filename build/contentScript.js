@@ -4,15 +4,14 @@ console.log("In AA contentScript")
 window.addEventListener('load', function () {
     console.log("Loaded ")
     var body = document.body;
-    var elements = document.getElementsByTagName('span')
-    /* When the DOM is ready find all the images and background images
-        initially loaded */
+    let elements = document.getElementsByTagName('article')
 
+    console.log(elements.length)
+    Array.from(elements).forEach(function (element) {
+        console.log(element)
+      });
     
-    Array.prototype.forEach.call( elements, function ( el ) {
-        
-        console.log(el);
-    });
+    
 
     /* MutationObserver callback to add spans when the body changes */
     var callback = function( mutationsList, observer ){
@@ -21,8 +20,7 @@ window.addEventListener('load', function () {
                
                 Array.prototype.forEach.call( mutation.target.children, function ( child ) {
                    
-                    
-                    if(child.tagName ==='SPAN')  {
+                    if(child.tagName ==='ARTICLE')  {
                        
                         spans.push(child);
                         console.log(child);
