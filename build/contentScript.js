@@ -56,7 +56,6 @@ window.addEventListener('load', function () {
                     total_text = total_text.concat(text.innerText);
                 }
                 console.log("Tweet: ",total_text)
-                console.log("Type :",mutation)
 
                 
             }
