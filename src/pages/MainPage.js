@@ -174,6 +174,7 @@ const MainPage = () => {
     const handleDurationChange = (event) => {
         setDuration(event.target.value);
     };
+    console.log(TweetsByweek);
     return (
         <div>
             <HeaderContainer>
