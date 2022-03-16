@@ -69,6 +69,11 @@ export default function BarChartComponent({ graphTweets }) {
         width={600}
         options={{
           maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
         }}
       />
     </div>
