@@ -4,10 +4,9 @@
   "manifest_version": 2,
   "description": "Emotool",
   "icons": {
-      "512": "logo512.png"
+    "512": "logo512.png"
   },
   "content_security_policy": "script-src 'self' https://cdn.firebase.com https://*.firebaseio.com https://apis.google.com; object-src 'self'",
-  
   "permissions": [
     "tabs",
     "bookmarks",
@@ -20,9 +19,17 @@
     "https://www.google.com/"
   ],
   "browser_action": {
-      "default_icon": "logo512.png",
-      "default_popup": "popup.html"
-  }
-
-  
+    "default_icon": "logo512.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.twitter.com/*"
+      ],
+      "js": [
+        "contentScript.js"
+      ]
+    }
+  ]
 }
