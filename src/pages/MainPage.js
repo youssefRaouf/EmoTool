@@ -4,10 +4,13 @@ import { getTweets } from '../Services/api.js';
 import styled from "styled-components";
 import "../styles/checkboxes.scss"
 import Visualization from "../Components/Visualization"
+import Filter from "../Components/FilterComponent"
+import Status from "../Components/StatusComponent"
 import formatDistanceToNowStrict from 'date-fns/formatDistanceToNowStrict'
 import addDays from 'date-fns/addDays'
 import addMonths from 'date-fns/addMonths'
 import format from 'date-fns/format'
+
 
 const HeaderContainer = styled.div`
     display: flex;
@@ -48,11 +51,30 @@ const LogoutBtn = styled.div`
 
 const MainPage = () => {
 
+
     const location = useLocation()
     const navigate = useNavigate()
     const [tweets, setTweets] = useState(location.state?.tweets || [])
     const [tab, setTab] = useState(0);
     const [duration, setDuration] = useState('week');
+    const [moodTweets, setMoodTweets] = useState([])
+    //State for filters.
+    const [filters, setFilters] = useState({
+            Joy: false,
+            Sadness: false,
+            Anger: false,
+            Disgust: false,
+            Neutral: false ,
+            Surprise: false ,
+            Fear: false
+    });
+    //State for Current mood (Emotion with max. tweets).
+    const[status,setStatus] = useState({
+        label: "Neutral",
+        duration: "Week"
+    })
+
+
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
         const accessToken = localStorage.getItem('accessToken');
@@ -64,16 +86,6 @@ const MainPage = () => {
         })
         setTweets(response)
     }
-    //State for filters.
-    const [filters, setFilters] = useState({
-            Joy: false,
-            Sadness: false,
-            Anger: false,
-            Disgust: false,
-            Neutral: false ,
-            Surprise: false ,
-            Fear: false
-    });
 
     useEffect(() => {
         if (!location.state?.tweets) {
@@ -186,21 +198,20 @@ const MainPage = () => {
     const handleDurationChange = (event) => {
         setDuration(event.target.value);
     };
-    console.log(TweetsByweek);
+
 
     //Handling Checkboxes states
     const handleCheckBox = event => {
-        console.log(event.target.value);
         const val = event.target.value
-        console.log(val);
         const check = event.target.checked
-        console.log(check);
         setFilters(previousState => {
             return { ...previousState, [val]: check }
           });
           
     }
-    useEffect(() => console.log(filters))
+    useEffect(() => {
+        setMoodTweets(duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear)
+    }, [duration, TweetsByMonth, TweetsByYear, TweetsByweek])
 
     return (
         <div>
@@ -213,70 +224,11 @@ const MainPage = () => {
             </HeaderContainer>
             {tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
             {tab===1 && 
-            <div id="grb">
-            <h1 id="example-page-main-heading">Filter Tweets</h1>
-            <main>
-                <div className="example-box">
-                <div>
-                  <label htmlFor="check-1">Joy</label>
-                  <div className="checkbox-wrapper">
-                  <input onChange={handleCheckBox} type="checkbox" name="labels" value="Joy" />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-2">Sadness</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Sadness"   />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-3">Anger</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Anger"  />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-4">Disgust</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Disgust"  />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-5">Fear</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Fear"  />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-6">Surprise</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Surprise"  />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="check-7">Neutral</label>
-                  <div className="checkbox-wrapper">
-                    <input onChange={handleCheckBox} type="checkbox" name="labels" value="Neutral"   />
-                    <span aria-hidden="true"></span>
-                  </div>
-                </div>
-               </div>
-               </main>
-            </div> 
+                <Filter handleCheckBox={handleCheckBox}/>
             }
-            {tab===2 && <div id="grb">Put status here</div>}
+            {tab===2 && 
+                <Status status={status}/>
+            }
         </div>
     );
 }

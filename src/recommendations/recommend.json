@@ -1,5 +1,6 @@
-{
-    "Joy" : {
+[
+    {
+        "label" : "Joy" ,
         "advice" : 
         [
             "Live in the moment!" 
@@ -13,9 +14,12 @@
             ,
             "https://twitter.com/memesmelody?lang=en"
         ]
+        ,
+        "color": "rgba(255, 38, 38, 1)"
     } 
     ,
-    "Neutral" : {
+    {
+        "label" : "Neutral" ,
         "advice" : 
         [
             "Express your emotions; don’t let them build up, but talk about them to your friends, parents or write about them!"
@@ -25,9 +29,12 @@
         [
             "https://www.quora.com/How-can-I-get-better-at-expressing-my-emotions"
         ]
+        ,
+        "color": "rgba(255,99,13,1)"
     }
     ,
-    "Fear" : {
+    {
+        "label" : "Fear" ,
         "advice" : 
         ["Don't fear failure , fear being in the exact same place next year as you are today!" 
             ,
@@ -42,9 +49,12 @@
         [
             "https://www.youtube.com/watch?v=bb9g9mtDHZo"
         ]
+        ,
+        "color": "rgba(255,206,86,1)"
     } 
     ,
-    "Disgust" : {
+    {
+        "label" : "Disgust" ,
         "advice" : 
         [
             "Use the times when you feel disgusted to identify what triggered that feeling. By finding the source, you’ll get to know yourself better. Is your disgust justified? How can you better manage situations where it may appear?"
@@ -54,9 +64,12 @@
         [
             "https://www.yourtango.com/experts/billmaiermsw/what-do-when-you-feel-absolute-disgust-toward-others-affects-your-mental-health"
         ]
+        ,
+        "color": "rgba(255,99,13,1)"
     } 
     ,
-    "Sad" : {
+    {
+        "label" : "Sad" ,
         "advice" : 
         [
             "Not all storms comes to disrupt your life , some come to clear your path"
@@ -76,9 +89,12 @@
         "https://www.youtube.com/watch?v=DODLEX4zzLQ"
 
         ]
+        ,
+        "color": "rgba(42, 80, 159, 1)"
     } 
     ,
-    "Surprise" : {
+    {
+        "label" : "Surprise" ,
         "advice" : 
         [
             "If you want something you have never had, you must be willing to do something you have never done"
@@ -92,9 +108,12 @@
             ,
             "https://www.quora.com/Experiences-in-Life-What-recent-positive-surprise-have-you-experienced"
         ]
+        ,
+        "color": "rgba(72, 44, 44, 1)"
     } 
     ,
-    "Anger" : {
+    {
+        "label" : "Anger" ,
         "advice" : 
         [
             "Take Some Deep Breaths!"
@@ -110,5 +129,7 @@
             ,
             "https://www.youtube.com/watch?v=wkse4PPxkk4"
         ]
+        ,
+        "color": "rgba(255, 38, 38, 1)"
     } 
-}
+]
