@@ -1,15 +1,63 @@
-window.addEventListener('load', function () {
-    let tweetsSection = document.getElementsByTagName('section')[0]
-    setTimeout(() => {
+let tweets = []
+let filters = []
+if (localStorage.getItem('filters')) {
+    filters = JSON.parse(localStorage.getItem('filters'))
+}
+chrome.runtime.onMessage.addListener(
+    function (request) {
+        filters = request.filters
+        hideElements()
+        localStorage.setItem('filters', JSON.stringify(filters))
+    }
+);
+
+
+const classifyTweets = async (tweets) => {
+    const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
+    const data = await fetch(endpointURL, {
+        method: "POST",
+        body: JSON.stringify({
+            tweets
+        })
+    }).then(res => {
+        return res.json();
+    })
+    return data
+}
+const hideElements = () => {
+    const hideElement = document.createElement('div')
+    hideElement.style = "font-size:20px;height: 100%;width: 100%;position: absolute;backdrop-filter: blur(8px);display: flex;justify-content: center;align-items: center;"
+    const text = document.createElement('span')
+    text.innerText = "Hidden By Emotool"
+    hideElement.appendChild(text)
+    const elements = document.getElementsByTagName('article')
+    for (const el of elements) {
+        const spans = el.getElementsByTagName('span');
+        let total_text = "";
+        // To avoid taking user name from spans
+        let userInfo = 0;
+        for (const text of spans) {
+            if (userInfo <= 3) {
+                userInfo++;
+                continue;
+            }
+            total_text = total_text.concat(text.innerText);
+        }
+        if (tweets.find(tweet => tweet.text === total_text)?.label && filters.includes(tweets.find(tweet => tweet.text === total_text)?.label)) {
+            el.style.display = 'none'
+            // TODO
+            // const parent = el.parentNode
+            // parent.appendChild(hideElement)
+        } else {
+            el.style.display = 'flex'
+        }
+    }
+}
+window.addEventListener('load', async () => {
+    setTimeout(async () => {
+        let tweetsSection = document.getElementsByClassName('r-1jgb5lz')[0]
         console.log("Loaded")
-        const hideElement = document.createElement('div')
-        hideElement.style = "font-size:20px;height: 100%;width: 100%;position: absolute;backdrop-filter: blur(8px);display: flex;justify-content: center;align-items: center;"
-        const text = document.createElement('span')
-        text.innerText = "Hidden By Emotool"
-        hideElement.appendChild(text)
-        tweetsSection = document.getElementsByTagName('section')[0]
         const elements = document.getElementsByTagName('article')
-        const tweets = []
         for (const el of elements) {
             if (!el.id) {
                 el.id = "article_" + tweets.length
@@ -27,13 +75,13 @@ window.addEventListener('load', function () {
             }
             tweets.push({ text: total_text, label: null, id: tweets.length })
         }
-
+        tweets = await classifyTweets(tweets)
+        hideElements()
         /* MutationObserver callback to add spans when the body changes */
-        const callback = function (mutationsList, observer) {
+        const callback = async (mutationsList, observer) => {
+            let tweetsChanged = false
             for (const mutation of mutationsList) {
                 if (mutation.target.tagName === 'ARTICLE' && mutation.attributeName === 'role') {
-                    const parent = document.getElementById('article_0').parentNode
-                    parent.appendChild(hideElement)
                     const spans = mutation.target.getElementsByTagName('span');
                     let total_text = "";
                     // To avoid taking user name from spans
@@ -45,15 +93,18 @@ window.addEventListener('load', function () {
                         }
                         total_text = total_text.concat(text.innerText);
                     }
+                    hideElements()
                     if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        if (!mutation.target.id) {
-                            mutation.target.id = "article_" + tweets.length
-                        }
                         tweets.push({ text: total_text, label: null, id: tweets.length })
-                        console.log(tweets)
+                        tweetsChanged = true
                     }
                 }
             }
+            if (tweetsChanged) {
+                tweets = await classifyTweets(tweets)
+                hideElements()
+            }
+
         }
         const observer = new MutationObserver(callback);
         const config = {
@@ -63,6 +114,5 @@ window.addEventListener('load', function () {
             attributeFilter: ['role']
         };
         observer.observe(tweetsSection, config);
-    }, 3000)
-
+    }, 2000)
 });

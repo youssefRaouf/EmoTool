@@ -1,3 +1,4 @@
+/*global chrome*/
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { getTweets } from '../Services/api.js';
@@ -57,19 +58,10 @@ const MainPage = () => {
     const [tweets, setTweets] = useState(location.state?.tweets || [])
     const [tab, setTab] = useState(0);
     const [duration, setDuration] = useState('week');
-    const [moodTweets, setMoodTweets] = useState([])
     //State for filters.
-    const [filters, setFilters] = useState({
-            Joy: false,
-            Sadness: false,
-            Anger: false,
-            Disgust: false,
-            Neutral: false ,
-            Surprise: false ,
-            Fear: false
-    });
+    const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
     //State for Current mood (Emotion with max. tweets).
-    const[status,setStatus] = useState({
+    const [status, setStatus] = useState({
         label: "Neutral",
         duration: "Week"
     })
@@ -199,19 +191,29 @@ const MainPage = () => {
         setDuration(event.target.value);
     };
 
-
-    //Handling Checkboxes states
-    const handleCheckBox = event => {
+    const handleCheckBox = useCallback(event => {
         const val = event.target.value
         const check = event.target.checked
-        setFilters(previousState => {
-            return { ...previousState, [val]: check }
-          });
-          
-    }
+        if (check) {
+            filters.push(val)
+            setFilters([...filters])
+            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { filters });
+            });
+        } else {
+            const newFilters = filters.filter(f => f !== val)
+            setFilters([...newFilters])
+            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { filters: newFilters });
+            });
+        }
+    }, [setFilters, filters])
+
     useEffect(() => {
-        setMoodTweets(duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear)
-    }, [duration, TweetsByMonth, TweetsByYear, TweetsByweek])
+        localStorage.setItem('filters', JSON.stringify(filters))
+    }, [filters])
 
     return (
         <div>
@@ -223,11 +225,11 @@ const MainPage = () => {
                 <LogoutBtn onClick={logout}>Logout</LogoutBtn>
             </HeaderContainer>
             {tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
-            {tab===1 && 
-                <Filter handleCheckBox={handleCheckBox}/>
+            {tab === 1 &&
+                <Filter filters={filters} handleCheckBox={handleCheckBox} />
             }
-            {tab===2 && 
-                <Status status={status}/>
+            {tab === 2 &&
+                <Status status={status} />
             }
         </div>
     );
