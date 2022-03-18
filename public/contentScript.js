@@ -59,9 +59,6 @@ window.addEventListener('load', async () => {
         console.log("Loaded")
         const elements = document.getElementsByTagName('article')
         for (const el of elements) {
-            if (!el.id) {
-                el.id = "article_" + tweets.length
-            }
             const spans = el.getElementsByTagName('span');
             let total_text = "";
             // To avoid taking user name from spans
@@ -73,7 +70,7 @@ window.addEventListener('load', async () => {
                 }
                 total_text = total_text.concat(text.innerText);
             }
-            tweets.push({ text: total_text, label: null, id: tweets.length })
+            tweets.push({ text: total_text, label: null, })
         }
         tweets = await classifyTweets(tweets)
         hideElements()
@@ -95,7 +92,7 @@ window.addEventListener('load', async () => {
                     }
                     hideElements()
                     if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null, id: tweets.length })
+                        tweets.push({ text: total_text, label: null })
                         tweetsChanged = true
                     }
                 }
