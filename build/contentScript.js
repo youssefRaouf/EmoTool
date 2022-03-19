@@ -1,6 +1,15 @@
 const script = document.createElement('script')
 let tweets = []
 let filters = []
+
+const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/,'g');
+                 
+// TODO remove this
+const httpsReg =  RegExp(/(https?):\/\//,'g');
+
+// Remove numbers
+const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/,'g');
+
 if (localStorage.getItem('filters')) {
     filters = JSON.parse(localStorage.getItem('filters'))
 }
@@ -27,6 +36,7 @@ const classifyTweets = async () => {
     if (tweetsToClassify.length === 0) {
         return []
     }
+   
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
@@ -43,20 +53,14 @@ const hideElements = () => {
     const text = document.createElement('span')
     text.innerText = "Hidden By Emotool"
     hideElement.appendChild(text)
-    const elements = document.getElementsByTagName('article')
-    for (const el of elements) {
-        const spans = el.getElementsByTagName('span');
-        let total_text = "";
-        // To avoid taking user name from spans
-        let userInfo = 0;
-        for (const text of spans) {
-            if (userInfo <= 3) {
-                userInfo++;
-                continue;
-            }
-            total_text = total_text.concat(text.innerText);
-        }
-        if (tweets.find(tweet => tweet.text === total_text)?.label && filters.includes(tweets.find(tweet => tweet.text === total_text)?.label)) {
+    //const elements = document.getElementsByTagName('article')
+
+    for( const tweet of tweets)
+    {
+        
+        const el = tweet.target_article;
+
+        if (tweet.label && filters.includes(tweet.label)) {
             el.style.display = 'none'
             // TODO
             // const parent = el.parentNode
@@ -65,6 +69,7 @@ const hideElements = () => {
             el.style.display = 'flex'
         }
     }
+ 
 }
 window.addEventListener('load', async () => {
     setTimeout(async () => {
@@ -77,14 +82,45 @@ window.addEventListener('load', async () => {
             let total_text = "";
             // To avoid taking user name from spans
             let userInfo = 0;
-            for (const text of spans) {
+            for (var text of spans) {
                 if (userInfo <= 3) {
                     userInfo++;
                     continue;
                 }
+                 // Remove hashtag sign 
+                 text.innerText = text.innerText.replaceAll('#','');
+
+                 // remove urls
+
+                 text.innerText = text.innerText.replaceAll(urlReg, '');
+                 
+                 text.innerText = text.innerText.replaceAll(httpsReg,'');
+
+
+                 // Remove numbers
+                 text.innerText = text.innerText.replaceAll(NumberRegex,'');
+                 
+
+                 text.innerText = text.innerText.replaceAll('views','');
+                // Thread message and info so break
+                if(text.innerText ==="Show this thread")
+                {
+                    break;
+                }
+
+                //Tag , spaces , empty or dots
+                if(text.innerText[0]==='@'||text.innerHTML===""||text.innerHTML===" "||text.innerHTML==='.')
+                {
+                    continue;
+                }
+                       
+                
+                        
+                
                 total_text = total_text.concat(text.innerText);
             }
-            tweets.push({ text: total_text, label: null, id: tweets.length, sent: false })
+            console.log(total_text);
+            tweets.push({ text: total_text, label: null, id: tweets.length, sent: false,target_article:el })
         }
         debounce()
         /* MutationObserver callback to add spans when the body changes */
@@ -96,17 +132,51 @@ window.addEventListener('load', async () => {
                     let total_text = "";
                     // To avoid taking user name from spans
                     let userInfo = 0;
-                    for (const text of spans) {
+                   
+                    for (var text of spans) {
+                        
                         if (userInfo <= 3) {
                             userInfo++;
                             continue;
                         }
+                                
+                        // Remove hashtag sign 
+                        text.innerText = text.innerText.replaceAll('#','');
+
+                        // remove urls
+
+                       
+                        text.innerText = text.innerText.replaceAll(urlReg, '');
+                        
+                        text.innerText = text.innerText.replaceAll(httpsReg,'');
+
+
+                        // Remove numbers
+                        text.innerText = text.innerText.replaceAll(NumberRegex,'');
+                        
+
+
+                        text.innerText = text.innerText.replaceAll('views','');
+                        // Thread message and info so break
+                        if(text.innerText ==="Show this thread")
+                        {
+                            break;
+                        }
+
+                        //Tag , spaces , empty or dots
+                        if(text.innerText[0]==='@'||text.innerHTML===""||text.innerHTML===" "||text.innerHTML==='.')
+                        {
+                            continue;
+                        }
+                        
                         total_text = total_text.concat(text.innerText);
                     }
+                    console.log(total_text);
                     hideElements()
                     if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false })
+                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,target_article:mutation.target})
                         tweetsChanged = true
+                       
                     }
                 }
             }
