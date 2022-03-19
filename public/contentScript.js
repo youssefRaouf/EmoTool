@@ -12,12 +12,14 @@ chrome.runtime.onMessage.addListener(
 );
 
 
-const classifyTweets = async (tweets) => {
+const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
+    const tweetsToClassify = [...tweets ]
+    tweets = [...tweets.map(t => ({ ...t, sent: true }))]
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
-            tweets
+            tweets: tweetsToClassify.filter(t => !t.label && !t.sent)
         })
     }).then(res => {
         return res.json();
@@ -70,11 +72,11 @@ window.addEventListener('load', async () => {
                 }
                 total_text = total_text.concat(text.innerText);
             }
-            tweets.push({ text: total_text, label: null, id: tweets.length })
+            tweets.push({ text: total_text, label: null, id: tweets.length, sent: false })
         }
-        classifyTweets(tweets).then(labeledTweets => {
+        classifyTweets().then(labeledTweets => {
             labeledTweets.forEach(tweet => {
-                tweets[tweet.id] = { ...tweet }
+                tweets[tweet.id] = { ...tweet, sent: true }
             })
             hideElements()
         })
@@ -96,15 +98,15 @@ window.addEventListener('load', async () => {
                     }
                     hideElements()
                     if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null, id: tweets.length })
+                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false })
                         tweetsChanged = true
                     }
                 }
             }
             if (tweetsChanged) {
-                classifyTweets(tweets).then(labeledTweets => {
+                classifyTweets().then(labeledTweets => {
                     labeledTweets.forEach(tweet => {
-                        tweets[tweet.id] = { ...tweet }
+                        tweets[tweet.id] = { ...tweet, sent: true }
                     })
                     hideElements()
                 })
