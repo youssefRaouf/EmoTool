@@ -28,6 +28,7 @@
         "*://*.twitter.com/*"
       ],
       "js": [
+        "lodash.js",
         "contentScript.js"
       ]
     }

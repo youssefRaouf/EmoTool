@@ -1,3 +1,4 @@
+const script = document.createElement('script')
 let tweets = []
 let filters = []
 if (localStorage.getItem('filters')) {
@@ -10,16 +11,26 @@ chrome.runtime.onMessage.addListener(
         localStorage.setItem('filters', JSON.stringify(filters))
     }
 );
-
+const debounce = _.debounce(function () {
+    classifyTweets().then(labeledTweets => {
+        labeledTweets.forEach(tweet => {
+            tweets[tweet.id] = { ...tweet, sent: true }
+        })
+        hideElements()
+    })
+}, 200);
 
 const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
-    const tweetsToClassify = [...tweets ]
+    const tweetsToClassify = [...tweets.filter(t => !t.label && !t.sent)]
     tweets = [...tweets.map(t => ({ ...t, sent: true }))]
+    if (tweetsToClassify.length === 0) {
+        return []
+    }
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
-            tweets: tweetsToClassify.filter(t => !t.label && !t.sent)
+            tweets: tweetsToClassify
         })
     }).then(res => {
         return res.json();
@@ -57,6 +68,7 @@ const hideElements = () => {
 }
 window.addEventListener('load', async () => {
     setTimeout(async () => {
+
         let tweetsSection = document.getElementsByClassName('r-1jgb5lz')[0]
         console.log("Loaded")
         const elements = document.getElementsByTagName('article')
@@ -74,12 +86,7 @@ window.addEventListener('load', async () => {
             }
             tweets.push({ text: total_text, label: null, id: tweets.length, sent: false })
         }
-        classifyTweets().then(labeledTweets => {
-            labeledTweets.forEach(tweet => {
-                tweets[tweet.id] = { ...tweet, sent: true }
-            })
-            hideElements()
-        })
+        debounce()
         /* MutationObserver callback to add spans when the body changes */
         const callback = async (mutationsList, observer) => {
             let tweetsChanged = false
@@ -104,12 +111,7 @@ window.addEventListener('load', async () => {
                 }
             }
             if (tweetsChanged) {
-                classifyTweets().then(labeledTweets => {
-                    labeledTweets.forEach(tweet => {
-                        tweets[tweet.id] = { ...tweet, sent: true }
-                    })
-                    hideElements()
-                })
+                debounce()
             }
         }
         const observer = new MutationObserver(callback);
