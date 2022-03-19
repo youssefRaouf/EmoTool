@@ -60,12 +60,6 @@ const MainPage = () => {
     const [duration, setDuration] = useState('week');
     //State for filters.
     const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
-    //State for Current mood (Emotion with max. tweets).
-    const [status, setStatus] = useState({
-        label: "Neutral",
-        duration: "Week"
-    })
-
 
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
@@ -95,6 +89,16 @@ const MainPage = () => {
             surprise: [0, 0, 0, 0, 0, 0, 0],
             disgust: [0, 0, 0, 0, 0, 0, 0],
             neutral: [0, 0, 0, 0, 0, 0, 0],
+            status: { label: 'Neutral', duration: "Week" },
+        }
+        const totalNumberOflabels = {
+            sadness: 0,
+            anger: 0,
+            fear: 0,
+            joy: 0,
+            surprise: 0,
+            disgust: 0,
+            neutral: 0
         }
         tweets.forEach((tweet) => {
             const result = formatDistanceToNowStrict(
@@ -105,12 +109,16 @@ const MainPage = () => {
                     const arr = result.split(' ')
                     if (arr[0] <= 6) {
                         tweetsByweek[tweet.label][6 - arr[0]] = tweetsByweek[tweet.label][6 - arr[0]] + 1
+                        totalNumberOflabels[tweet.label] = totalNumberOflabels[tweet.label] + 1
+
                     }
                 } else {
                     tweetsByweek[tweet.label][6] = tweetsByweek[tweet.label][6] + 1
+                    totalNumberOflabels[tweet.label] = totalNumberOflabels[tweet.label] + 1
                 }
             }
         })
+        tweetsByweek.status.label = Object.keys(totalNumberOflabels).reduce((a, b) => totalNumberOflabels[a] > totalNumberOflabels[b] ? a : b)
         return tweetsByweek
     }, [tweets])
 
@@ -124,12 +132,23 @@ const MainPage = () => {
             surprise: [0, 0, 0, 0, 0],
             disgust: [0, 0, 0, 0, 0],
             neutral: [0, 0, 0, 0, 0],
+            status: { label: 'Neutral', duration: "Month" },
+        }
+        const totalNumberOflabels = {
+            sadness: 0,
+            anger: 0,
+            fear: 0,
+            joy: 0,
+            surprise: 0,
+            disgust: 0,
+            neutral: 0
         }
         tweets.forEach((tweet) => {
             const result = formatDistanceToNowStrict(
                 new Date(tweet.date)
             )
             if (!result.includes('years') && !result.includes('months')) {
+                totalNumberOflabels[tweet.label] = totalNumberOflabels[tweet.label] + 1
                 if (result.includes('days')) {
                     const arr = result.split(' ')
                     if (arr[0] <= 5) {
@@ -152,6 +171,7 @@ const MainPage = () => {
                 }
             }
         })
+        tweetsByMonth.status.label = Object.keys(totalNumberOflabels).reduce((a, b) => totalNumberOflabels[a] > totalNumberOflabels[b] ? a : b)
         return tweetsByMonth
     }, [tweets])
 
@@ -165,12 +185,23 @@ const MainPage = () => {
             surprise: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             disgust: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             neutral: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            status: { label: 'Neutral', duration: "Year" },
+        }
+        const totalNumberOflabels = {
+            sadness: 0,
+            anger: 0,
+            fear: 0,
+            joy: 0,
+            surprise: 0,
+            disgust: 0,
+            neutral: 0
         }
         tweets.forEach((tweet) => {
             const result = formatDistanceToNowStrict(
                 new Date(tweet.date)
             )
             if (!result.includes('years')) {
+                totalNumberOflabels[tweet.label] = totalNumberOflabels[tweet.label] + 1
                 if (result.includes('months')) {
                     const arr = result.split(' ')
                     tweetsByYear[tweet.label][11 - arr[0]] = tweetsByYear[tweet.label][11 - arr[0]] + 1
@@ -179,6 +210,7 @@ const MainPage = () => {
                 }
             }
         })
+        tweetsByYear.status.label = Object.keys(totalNumberOflabels).reduce((a, b) => totalNumberOflabels[a] > totalNumberOflabels[b] ? a : b)
         return tweetsByYear
     }, [tweets])
 
@@ -229,7 +261,7 @@ const MainPage = () => {
                 <Filter filters={filters} handleCheckBox={handleCheckBox} />
             }
             {tab === 2 &&
-                <Status status={status} />
+                <Status status={duration === "week" ? TweetsByweek.status : duration === "month" ? TweetsByMonth.status : TweetsByYear.status} />
             }
         </div>
     );
