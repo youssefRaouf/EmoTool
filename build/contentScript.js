@@ -59,9 +59,6 @@ window.addEventListener('load', async () => {
         console.log("Loaded")
         const elements = document.getElementsByTagName('article')
         for (const el of elements) {
-            if (!el.id) {
-                el.id = "article_" + tweets.length
-            }
             const spans = el.getElementsByTagName('span');
             let total_text = "";
             // To avoid taking user name from spans
@@ -75,8 +72,12 @@ window.addEventListener('load', async () => {
             }
             tweets.push({ text: total_text, label: null, id: tweets.length })
         }
-        tweets = await classifyTweets(tweets)
-        hideElements()
+        classifyTweets(tweets).then(labeledTweets => {
+            labeledTweets.forEach(tweet => {
+                tweets[tweet.id] = { ...tweet }
+            })
+            hideElements()
+        })
         /* MutationObserver callback to add spans when the body changes */
         const callback = async (mutationsList, observer) => {
             let tweetsChanged = false
@@ -101,10 +102,13 @@ window.addEventListener('load', async () => {
                 }
             }
             if (tweetsChanged) {
-                tweets = await classifyTweets(tweets)
-                hideElements()
+                classifyTweets(tweets).then(labeledTweets => {
+                    labeledTweets.forEach(tweet => {
+                        tweets[tweet.id] = { ...tweet }
+                    })
+                    hideElements()
+                })
             }
-
         }
         const observer = new MutationObserver(callback);
         const config = {

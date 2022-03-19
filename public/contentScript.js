@@ -70,10 +70,14 @@ window.addEventListener('load', async () => {
                 }
                 total_text = total_text.concat(text.innerText);
             }
-            tweets.push({ text: total_text, label: null, })
+            tweets.push({ text: total_text, label: null, id: tweets.length })
         }
-        tweets = await classifyTweets(tweets)
-        hideElements()
+        classifyTweets(tweets).then(labeledTweets => {
+            labeledTweets.forEach(tweet => {
+                tweets[tweet.id] = { ...tweet }
+            })
+            hideElements()
+        })
         /* MutationObserver callback to add spans when the body changes */
         const callback = async (mutationsList, observer) => {
             let tweetsChanged = false
@@ -92,16 +96,19 @@ window.addEventListener('load', async () => {
                     }
                     hideElements()
                     if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null })
+                        tweets.push({ text: total_text, label: null, id: tweets.length })
                         tweetsChanged = true
                     }
                 }
             }
             if (tweetsChanged) {
-                tweets = await classifyTweets(tweets)
-                hideElements()
+                classifyTweets(tweets).then(labeledTweets => {
+                    labeledTweets.forEach(tweet => {
+                        tweets[tweet.id] = { ...tweet }
+                    })
+                    hideElements()
+                })
             }
-
         }
         const observer = new MutationObserver(callback);
         const config = {
