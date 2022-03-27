@@ -1,5 +1,5 @@
 /*global chrome*/
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { getTweets } from '../Services/api.js';
 import styled from "styled-components";
@@ -11,7 +11,15 @@ import formatDistanceToNowStrict from 'date-fns/formatDistanceToNowStrict'
 import addDays from 'date-fns/addDays'
 import addMonths from 'date-fns/addMonths'
 import format from 'date-fns/format'
+import { TailSpin } from 'react-loader-spinner'
 
+
+const SpinnerContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 447.38px;
+`;
 
 const HeaderContainer = styled.div`
     display: flex;
@@ -51,33 +59,33 @@ const LogoutBtn = styled.div`
 `;
 
 const MainPage = () => {
-
-
-    const location = useLocation()
     const navigate = useNavigate()
-    const [tweets, setTweets] = useState(location.state?.tweets || [])
+    const [tweets, setTweets] = useState(JSON.parse(localStorage.getItem('tweets')) || [])
     const [tab, setTab] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [duration, setDuration] = useState('week');
-    //State for filters.
     const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
 
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
         const accessToken = localStorage.getItem('accessToken');
         const accessTokenSecret = localStorage.getItem('accessTokenSecret');
+        if (tweets?.length === 0) {
+            setLoading(true)
+        }
         const response = await getTweets({
             userId,
             accessToken,
             accessTokenSecret
         })
+        localStorage.setItem('tweets', JSON.stringify(response))
         setTweets(response)
+        setLoading(false)
     }
 
     useEffect(() => {
-        if (!location.state?.tweets) {
-            getTweetsForCachedUser()
-        }
-    }, [location.state?.tweets])
+        getTweetsForCachedUser()
+    }, [])
 
     const TweetsByweek = useMemo(() => {
         const tweetsByweek = {
@@ -216,6 +224,7 @@ const MainPage = () => {
 
     const logout = useCallback(() => {
         localStorage.setItem('user', null)
+        localStorage.setItem('tweets', null)
         navigate('/')
     }, [navigate])
 
@@ -256,7 +265,13 @@ const MainPage = () => {
                 <Tab onClick={() => setTab(2)} style={{ borderBottom: tab === 2 ? "1px solid red" : 0 }}>Status</Tab>
                 <LogoutBtn onClick={logout}>Logout</LogoutBtn>
             </HeaderContainer>
-            {tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
+            {loading && <SpinnerContainer><TailSpin
+                height="150"
+                width="150"
+                color='grey'
+                ariaLabel='loading'
+            /></SpinnerContainer>}
+            {!loading && tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
             {tab === 1 &&
                 <Filter filters={filters} handleCheckBox={handleCheckBox} />
             }

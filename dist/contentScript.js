@@ -36,7 +36,7 @@ const classifyTweets = async () => {
     if (tweetsToClassify.length === 0) {
         return []
     }
-   return [];
+   
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
