@@ -10,7 +10,7 @@ export default function Status({ status }) {
                     <div>
                         <h1>Your Frequent Emotion is <div style={{ color: emotion.color }} >{emotion.label} </div> </h1>
                         <div>{emotion.advice}</div>
-                        <a id="links" href={emotion.content[Math.floor(Math.random() * emotion.content.length)]}> Pick a Recommendation!</a>
+                        <a target="_blank" id="links" href={emotion.content[Math.floor(Math.random() * emotion.content.length)]}> Pick a Recommendation!</a>
                     </div> :
                     <div></div>
             })}
