@@ -2,6 +2,16 @@ const script = document.createElement('script')
 let tweets = []
 let filters = []
 
+
+// Users to watch out
+
+// Key: userHandle  Value :Object contains the number of tweets crossponding to 
+// each label
+// TODO Save this to local storage
+
+let users = new Map();
+
+
 const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/,'g');
                  
 // TODO remove this
@@ -23,7 +33,15 @@ chrome.runtime.onMessage.addListener(
 const debounce = _.debounce(function () {
     classifyTweets().then(labeledTweets => {
         labeledTweets.forEach(tweet => {
+              
+            // Add Label to the user
+            var user = users.get(tweet.userHandle);
+
+            user[tweet.label]+=1;
+
             tweets[tweet.id] = { ...tweet, sent: true }
+
+
         })
         hideElements()
     })
@@ -33,6 +51,7 @@ const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
     const tweetsToClassify = [...tweets.filter(t => !t.label && !t.sent)]
     tweets = [...tweets.map(t => ({ ...t, sent: true }))]
+    
     if (tweetsToClassify.length === 0) {
         return []
     }
@@ -52,12 +71,34 @@ function cleanTweets(spans)
 {
     let total_text = "";
     // To avoid taking user name from spans
-    let userInfo = 0;
+   
+    let endUserInfo = false;
+    
+    let all_text="";
+
+    let userHandle ="";
     for (var text of spans) {
-        if (userInfo <= 3) {
-                userInfo++;
+        all_text = all_text.concat(text.innerText);
+
+        // TODO MAKE this better 
+        // But this works for now
+        if (!endUserInfo) {
+            
+            // End User Info
+            if(text.innerText[0]==='·')
+            {
+                endUserInfo = true;
+               
+            }
+            // user Handle
+            if(text.innerText[0]==='@')
+            {
+                userHandle = text.innerText;
+            }
+              
                 continue;
             }
+          
                  // Remove hashtag sign 
             text.innerText = text.innerText.replaceAll('#','');
 
@@ -86,8 +127,20 @@ function cleanTweets(spans)
                        
             total_text = total_text.concat(text.innerText);
         
+
         }
-        return total_text;
+        
+        // didn't see this user before
+        // So add to the map with empty number of emotion labels
+        
+       if(!users.get(userHandle))
+       {
+            users.set(userHandle,{"joy":0,"sadness":0,"fear":0,"disgust":0,
+            "surprise":0,"neutral":0,"anger":0});
+
+       }
+       
+        return {userHandle,total_text};
 }
 const hideElements = () => {
     const hideElement = document.createElement('div')
@@ -103,7 +156,7 @@ const hideElements = () => {
         const spans = el.getElementsByTagName('span');
 
 
-        var total_text = cleanTweets(spans);
+        let {userHandle,total_text} = cleanTweets(spans);
 
         var tweet = tweets.find((tweet) => tweet.text === total_text);
         if (tweet&&tweet.label && filters.includes(tweet.label)) {
@@ -125,10 +178,16 @@ window.addEventListener('load', async () => {
         const elements = document.getElementsByTagName('article')
         for (const el of elements) {
             const spans = el.getElementsByTagName('span');
-            var total_text = cleanTweets(spans);
-            console.log(total_text);
-            tweets.push({ text: total_text, label: null, id: tweets.length, sent: false,target_article:el })
+            
+            let {userHandle,total_text} = cleanTweets(spans);
+            //console.log(total_text);
+
+            if(total_text!="")
+            {
+                tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,userHandle:userHandle})
+            }
         }
+
         debounce()
         /* MutationObserver callback to add spans when the body changes */
         const callback = async (mutationsList, observer) => {
@@ -137,11 +196,13 @@ window.addEventListener('load', async () => {
                 if (mutation.target.tagName === 'ARTICLE' && mutation.attributeName === 'role') {
                     const spans = mutation.target.getElementsByTagName('span');
                    
-                    var total_text = cleanTweets(spans);
-                    console.log(total_text)
+                    
+                    let {userHandle,total_text} = cleanTweets(spans);
+                    //console.log(total_text)
                     hideElements()
-                    if (!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,target_article:mutation.target})
+
+                    if (total_text!=""&&!tweets.find((tweet) => tweet.text === total_text)) {
+                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,userHandle:userHandle})
                         tweetsChanged = true
                        
                     }
