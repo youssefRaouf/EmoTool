@@ -51,7 +51,7 @@ const LoginScreen = () => {
             const accessToken = credential.accessToken;
             // Secret Access Token
             const accessTokenSecret = credential.secret;
-            localStorage.setItem('user', JSON.stringify(res.user));
+            localStorage.setItem('user', JSON.stringify({ ...res.user, handle: res._tokenResponse.screenName }));
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('accessTokenSecret', accessTokenSecret);
             setUser(res.user)

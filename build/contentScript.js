@@ -9,45 +9,48 @@ let filters = []
 // each label
 // TODO Save this to local storage
 
-let users = new Map();
+let users = JSON.parse(localStorage.getItem('users')) || {};
 
+const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/, 'g');
 
-const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/,'g');
-                 
 // TODO remove this
-const httpsReg =  RegExp(/(https?):\/\//,'g');
+const httpsReg = RegExp(/(https?):\/\//, 'g');
 
 // Remove numbers
-const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/,'g');
+const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/, 'g');
 
 if (localStorage.getItem('filters')) {
     filters = JSON.parse(localStorage.getItem('filters'))
 
 }
-console.log(localStorage.getItem('user'))
+
+const sendUsersAsMessage = () => {
+    chrome.runtime.sendMessage({ users: users }, () => {
+    });
+}
+
 chrome.runtime.onMessage.addListener(
     function (request) {
-        filters = request.filters
-        hideElements()
-        
-        localStorage.setItem('filters', JSON.stringify(filters))
+        if (request.sendUsers) {
+            sendUsersAsMessage()
+        } else {
+            filters = request.filters
+            hideElements()
+            localStorage.setItem('filters', JSON.stringify(filters))
+        }
     }
 );
 const debounce = _.debounce(function () {
     classifyTweets().then(labeledTweets => {
         labeledTweets.forEach(tweet => {
-              
-            if(tweet.userHandle!="")
-            {
-                
+            if (tweet.userHandle != "") {
                 // Add Label to the user
-                var user = users.get(tweet.userHandle);
-                user[tweet.label]+=1;
+                const user = users[tweet.userHandle];
+                user[tweet.label] = user[tweet.label] + 1;
+                localStorage.setItem('users', JSON.stringify(users))
+                sendUsersAsMessage();
             }
-
             tweets[tweet.id] = { ...tweet, sent: true }
-            
-
         })
         hideElements()
     })
@@ -57,11 +60,11 @@ const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
     const tweetsToClassify = [...tweets.filter(t => !t.label && !t.sent)]
     tweets = [...tweets.map(t => ({ ...t, sent: true }))]
-    
+
     if (tweetsToClassify.length === 0) {
         return []
     }
-   
+
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
@@ -73,80 +76,90 @@ const classifyTweets = async () => {
     return data
 }
 
-function cleanTweets(spans)
-{
+function cleanTweets(spans) {
     let total_text = "";
     // To avoid taking user name from spans
-   
-    let endUserInfo = false;
-    
-    let all_text="";
 
-    let userHandle ="";
-    for (var text of spans) {
+    let endUserInfo = false;
+
+    let all_text = "";
+
+    let userHandle = "";
+    for (const text of spans) {
         all_text = all_text.concat(text.innerText);
 
         // TODO MAKE this better 
         // But this works for now
         if (!endUserInfo) {
-            
+
             // End User Info
-            if(text.innerText[0]==='·')
-            {
+            if (text.innerText[0] === '·') {
                 endUserInfo = true;
-               
+
             }
             // user Handle
-            if(text.innerText[0]==='@')
-            {
+            if (text.innerText[0] === '@') {
                 userHandle = text.innerText;
             }
-              
-                continue;
-            }
-          
-                 // Remove hashtag sign 
-            text.innerText = text.innerText.replaceAll('#','');
 
-           // remove urls
-
-            text.innerText = text.innerText.replaceAll(urlReg, '');                 
-            text.innerText = text.innerText.replaceAll(httpsReg,'');
-
-
-            // Remove numbers
-            text.innerText = text.innerText.replaceAll(NumberRegex,'');
-                 
-
-            text.innerText = text.innerText.replaceAll('views','');
-            // Thread message and info so break
-            if(text.innerText ==="Show this thread")
-            {
-                break;
-            }
-
-            //Tag , spaces , empty or dots
-            if(text.innerText[0]==='@'||text.innerHTML===""||text.innerHTML===" "||text.innerHTML==='.')
-            {
-                continue;
-            }
-                       
-            total_text = total_text.concat(text.innerText);
-        
-
+            continue;
         }
-        
-        // didn't see this user before
-        // So add to the map with empty number of emotion labels
-        
-       if(!users.get(userHandle)&&userHandle!="")
-       {
-            users.set(userHandle,{"joy":0,"sadness":0,"fear":0,"disgust":0,
-            "surprise":0,"neutral":0,"anger":0});
 
-       }
-       
-        return {userHandle,total_text};
+        // Remove hashtag sign 
+        text.innerText = text.innerText.replaceAll('#', '');
+
+        // remove urls
+
+        text.innerText = text.innerText.replaceAll(urlReg, '');
+        text.innerText = text.innerText.replaceAll(httpsReg, '');
+
+
+        // Remove numbers
+        text.innerText = text.innerText.replaceAll(NumberRegex, '');
+
+
+        text.innerText = text.innerText.replaceAll('views', '');
+        // Thread message and info so break
+        if (text.innerText === "Show this thread") {
+            break;
+        }
+
+        //Tag , spaces , empty or dots
+        if (text.innerText[0] === '@' || text.innerHTML === "" || text.innerHTML === " " || text.innerHTML === '.') {
+            continue;
+        }
+        // Remove numbers
+        text.innerText = text.innerText.replaceAll(NumberRegex, '');
+
+
+        text.innerText = text.innerText.replaceAll('views', '');
+        // Thread message and info so break
+        if (text.innerText === "Show this thread") {
+            break;
+        }
+
+        //Tag , spaces , empty or dots
+        if (text.innerText[0] === '@' || text.innerHTML === "" || text.innerHTML === " " || text.innerHTML === '.') {
+            continue;
+        }
+
+        total_text = total_text.concat(text.innerText);
+
+
+    }
+
+    // didn't see this user before
+    // So add to the map with empty number of emotion labels
+
+    if (!users[userHandle] && userHandle !== "") {
+        users[userHandle] = {
+            "joy": 0, "sadness": 0, "fear": 0, "disgust": 0,
+            "surprise": 0, "neutral": 0, "anger": 0
+        };
+
+    }
+
+    return { userHandle, total_text };
 }
 const hideElements = () => {
     const hideElement = document.createElement('div')
@@ -155,25 +168,19 @@ const hideElements = () => {
     text.innerText = "Hidden By Emotool"
     hideElement.appendChild(text)
 
-
     // TODO remove this and keep object of this with every tweet
     const elements = document.getElementsByTagName('article')
     for (const el of elements) {
         const spans = el.getElementsByTagName('span');
 
+        let { userHandle, total_text } = cleanTweets(spans);
 
-        let {userHandle,total_text} = cleanTweets(spans);
-
-        var tweet = tweets.find((tweet) => tweet.text === total_text);
-        if (tweet&&tweet.label && filters.includes(tweet.label)) {
-            el.style.display = 'none'
-            // TODO
-            // const parent = el.parentNode
-            // parent.appendChild(hideElement)
+        const tweet = tweets.find((tweet) => tweet.text === total_text);
+        if (tweet && tweet.label && filters.includes(tweet.label)) {
+            el.style.filter = 'blur(4px)'
         } else {
-            el.style.display = 'flex'
+            el.style.filter = 'none'
         }
- 
     }
 }
 window.addEventListener('load', async () => {
@@ -184,13 +191,11 @@ window.addEventListener('load', async () => {
         const elements = document.getElementsByTagName('article')
         for (const el of elements) {
             const spans = el.getElementsByTagName('span');
-            
-            let {userHandle,total_text} = cleanTweets(spans);
-            //console.log(total_text);
 
-            if(total_text!="")
-            {
-                tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,userHandle:userHandle})
+            let { userHandle, total_text } = cleanTweets(spans);
+
+            if (total_text != "") {
+                tweets.push({ text: total_text, label: null, id: tweets.length, sent: false, userHandle: userHandle })
             }
         }
 
@@ -201,16 +206,15 @@ window.addEventListener('load', async () => {
             for (const mutation of mutationsList) {
                 if (mutation.target.tagName === 'ARTICLE' && mutation.attributeName === 'role') {
                     const spans = mutation.target.getElementsByTagName('span');
-                   
-                    
-                    let {userHandle,total_text} = cleanTweets(spans);
-                    //console.log(total_text)
+
+
+                    let { userHandle, total_text } = cleanTweets(spans);
                     hideElements()
 
-                    if (total_text!=""&&!tweets.find((tweet) => tweet.text === total_text)) {
-                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false ,userHandle:userHandle})
+                    if (total_text != "" && !tweets.find((tweet) => tweet.text === total_text)) {
+                        tweets.push({ text: total_text, label: null, id: tweets.length, sent: false, userHandle: userHandle })
                         tweetsChanged = true
-                       
+
                     }
                 }
             }

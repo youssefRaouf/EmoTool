@@ -65,7 +65,8 @@ const MainPage = () => {
     const [loading, setLoading] = useState(false);
     const [duration, setDuration] = useState('week');
     const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
-
+    const [users, setUsers] = useState(JSON.parse(localStorage.getItem('users')) || {});
+    console.log("xxxxxx",users)
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
         const accessToken = localStorage.getItem('accessToken');
@@ -255,6 +256,21 @@ const MainPage = () => {
     useEffect(() => {
         localStorage.setItem('filters', JSON.stringify(filters))
     }, [filters])
+
+    chrome.runtime.onMessage.addListener(
+        function (request, sender, sendResponse) {
+            localStorage.setItem('users', JSON.stringify(request.users))
+            setUsers(request.users)
+            sendResponse({ received: true });
+        }
+    );
+
+    useEffect(() => {
+        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+            const activeTab = tabs[0];
+            chrome.tabs.sendMessage(activeTab.id, { sendUsers: true });
+        });
+    }, [])
 
     return (
         <div>
