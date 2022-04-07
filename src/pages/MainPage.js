@@ -66,7 +66,6 @@ const MainPage = () => {
     const [duration, setDuration] = useState('week');
     const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
     const [users, setUsers] = useState(JSON.parse(localStorage.getItem('users')) || {});
-    console.log("xxxxxx",users)
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
         const accessToken = localStorage.getItem('accessToken');

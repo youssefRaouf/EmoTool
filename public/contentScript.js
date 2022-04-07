@@ -1,13 +1,6 @@
 const script = document.createElement('script')
-let tweets = []
+let tweets = JSON.parse(localStorage.getItem('tweets')) || []
 let filters = []
-
-
-// Users to watch out
-
-// Key: userHandle  Value :Object contains the number of tweets crossponding to 
-// each label
-// TODO Save this to local storage
 
 let users = JSON.parse(localStorage.getItem('users')) || {};
 
@@ -21,7 +14,6 @@ const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/, 'g');
 
 if (localStorage.getItem('filters')) {
     filters = JSON.parse(localStorage.getItem('filters'))
-
 }
 
 const sendUsersAsMessage = () => {
@@ -53,8 +45,13 @@ const debounce = _.debounce(function () {
             tweets[tweet.id] = { ...tweet, sent: true }
         })
         hideElements()
+        if (tweets.length > 2000) {
+            localStorage.setItem('tweets', JSON.stringify(tweets.slice(tweets.length - 2000, tweets.length)))
+        } else {
+            localStorage.setItem('tweets', JSON.stringify(tweets))
+        }
     })
-}, 200);
+}, 250);
 
 const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
