@@ -22,21 +22,37 @@ const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/,'g');
 
 if (localStorage.getItem('filters')) {
     filters = JSON.parse(localStorage.getItem('filters'))
+
 }
+console.log(localStorage.getItem('user'))
 chrome.runtime.onMessage.addListener(
     function (request) {
         filters = request.filters
         hideElements()
+        
         localStorage.setItem('filters', JSON.stringify(filters))
     }
 );
 const debounce = _.debounce(function () {
     classifyTweets().then(labeledTweets => {
         labeledTweets.forEach(tweet => {
+              
+            if(tweet.userHandle!="")
+            {
+                console.log("Before: ",users.get(tweet.userHandle))
+                // Add Label to the user
+                var user = users.get(tweet.userHandle);
             
-            var label = tweet.label;
+
+                console.log("User: ",tweet.userHandle);
+                console.log("Label: ",tweet.label)
+                console.log("Tweet: ",tweet.text)
+                user[tweet.label]+=1;
+            }
 
             tweets[tweet.id] = { ...tweet, sent: true }
+            
+
         })
         hideElements()
     })
@@ -46,13 +62,11 @@ const classifyTweets = async () => {
     const endpointURL = `http://localhost:8000/server/classifyMultipleTweets`;
     const tweetsToClassify = [...tweets.filter(t => !t.label && !t.sent)]
     tweets = [...tweets.map(t => ({ ...t, sent: true }))]
-    console.log("Tweets: ",tweets);
-    console.log("Trial: ",tweets[1]);
-    console.log("tweetsTo: ",tweetsToClassify);
+    
     if (tweetsToClassify.length === 0) {
         return []
     }
-   return [];
+   
     const data = await fetch(endpointURL, {
         method: "POST",
         body: JSON.stringify({
@@ -130,15 +144,13 @@ function cleanTweets(spans)
         // didn't see this user before
         // So add to the map with empty number of emotion labels
         
-       if(!users.get(userHandle))
+       if(!users.get(userHandle)&&userHandle!="")
        {
             users.set(userHandle,{"joy":0,"sadness":0,"fear":0,"disgust":0,
             "surprise":0,"neutral":0,"anger":0});
 
        }
-        console.log("User Handle: ",userHandle);
-        // console.log("Text: ",total_text);
-        // console.log("All text: ",all_text);
+       
         return {userHandle,total_text};
 }
 const hideElements = () => {
