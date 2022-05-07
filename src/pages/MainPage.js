@@ -1,7 +1,7 @@
 /*global chrome*/
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react"
-import { getTweets } from '../Services/api.js';
+import { getTweets, checkFollow } from '../Services/api.js';
 import styled from "styled-components";
 import "../styles/checkboxes.scss"
 import Visualization from "../Components/Visualization"
@@ -118,7 +118,6 @@ const MainPage = () => {
                     if (arr[0] <= 6) {
                         tweetsByweek[tweet.label][6 - arr[0]] = tweetsByweek[tweet.label][6 - arr[0]] + 1
                         totalNumberOflabels[tweet.label] = totalNumberOflabels[tweet.label] + 1
-
                     }
                 } else {
                     tweetsByweek[tweet.label][6] = tweetsByweek[tweet.label][6] + 1
@@ -258,9 +257,11 @@ const MainPage = () => {
 
     chrome.runtime.onMessage.addListener(
         function (request, sender, sendResponse) {
-            localStorage.setItem('users', JSON.stringify(request.users))
-            setUsers(request.users)
-            sendResponse({ received: true });
+            if (request.users) {
+                localStorage.setItem('users', JSON.stringify(request.users))
+                setUsers(request.users)
+                sendResponse({ received: true });
+            }
         }
     );
 
@@ -271,6 +272,27 @@ const MainPage = () => {
         });
     }, [])
 
+    const userToUnfollow = useMemo(() => {
+        let handle = ""
+        let max = 0;
+        for (const key in users) {
+            const maxTemp = users[key]['sadness'] + users[key]['fear'] + users[key]['anger']
+            if (maxTemp > max) {
+                handle = key
+            }
+        }
+        return handle
+    }, [users])
+    useEffect(async () => {
+        if (userToUnfollow !== "") {
+            const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
+            const result = await checkFollow({ source_id: userId, screen_name: userToUnfollow.slice(1) })
+            if (!result.following) {
+                delete users[userToUnfollow]
+                setUsers({ ...users })
+            }
+        }
+    }, [userToUnfollow])
     return (
         <div>
             <HeaderContainer>
@@ -291,7 +313,7 @@ const MainPage = () => {
                 <Filter filters={filters} handleCheckBox={handleCheckBox} />
             }
             {tab === 2 &&
-                <Status status={duration === "week" ? TweetsByweek.status : duration === "month" ? TweetsByMonth.status : TweetsByYear.status} />
+                <Status userToUnfollow={userToUnfollow} status={duration === "week" ? TweetsByweek.status : duration === "month" ? TweetsByMonth.status : TweetsByYear.status} />
             }
         </div>
     );

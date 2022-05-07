@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(
     function (request) {
         if (request.sendUsers) {
             sendUsersAsMessage()
-        } else {
+        }else {
             filters = request.filters
             hideElements()
             localStorage.setItem('filters', JSON.stringify(filters))

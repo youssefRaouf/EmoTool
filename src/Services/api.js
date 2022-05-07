@@ -19,3 +19,20 @@ export const getTweets = async (props) => {
     })
     return data
 }
+
+export const checkFollow = async (props) => {
+    const screen_name = props.screen_name;
+    const source_id = props.source_id;
+    const endpointURL = `http://localhost:8000/server/checkFollow`;
+    const data = await fetch(endpointURL, {
+        method: "POST",
+        body: JSON.stringify({
+            screen_name,
+            source_id,
+
+        })
+    }).then(res => {
+        return res.json();
+    })
+    return data
+}
