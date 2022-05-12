@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { getTweets, checkFollow } from '../Services/api.js';
 import styled from "styled-components";
-import "../styles/checkboxes.scss"
 import Visualization from "../Components/Visualization"
-import Filter from "../Components/FilterComponent"
+import ParentalControl from "../Components/ParentalControl"
 import Status from "../Components/StatusComponent"
 import formatDistanceToNowStrict from 'date-fns/formatDistanceToNowStrict'
 import addDays from 'date-fns/addDays'
@@ -64,7 +63,7 @@ const MainPage = () => {
     const [tab, setTab] = useState(0);
     const [loading, setLoading] = useState(false);
     const [duration, setDuration] = useState('week');
-    const [filters, setFilters] = useState(JSON.parse(localStorage.getItem('filters')) || []);
+    const [parentalControl, setParentalControl] = useState(JSON.parse(localStorage.getItem('parentalControl')) || false);
     const [users, setUsers] = useState(JSON.parse(localStorage.getItem('users')) || {});
     const getTweetsForCachedUser = async () => {
         const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
@@ -112,7 +111,7 @@ const MainPage = () => {
             const result = formatDistanceToNowStrict(
                 new Date(tweet.date)
             )
-            if (!result.includes('months') && !result.includes('years')) {
+            if (!result.includes('months') && !result.includes('month') && !result.includes('years')) {
                 if (result.includes('days')) {
                     const arr = result.split(' ')
                     if (arr[0] <= 6) {
@@ -232,44 +231,34 @@ const MainPage = () => {
     };
 
     const handleCheckBox = useCallback(event => {
-        const val = event.target.value
-        const check = event.target.checked
-        if (check) {
-            filters.push(val)
-            setFilters([...filters])
-            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-                const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { filters });
-            });
-        } else {
-            const newFilters = filters.filter(f => f !== val)
-            setFilters([...newFilters])
-            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-                const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { filters: newFilters });
-            });
-        }
-    }, [setFilters, filters])
-
-    useEffect(() => {
-        localStorage.setItem('filters', JSON.stringify(filters))
-    }, [filters])
-
-    chrome.runtime.onMessage.addListener(
-        function (request, sender, sendResponse) {
-            if (request.users) {
-                localStorage.setItem('users', JSON.stringify(request.users))
-                setUsers(request.users)
-                sendResponse({ received: true });
-            }
-        }
-    );
-
-    useEffect(() => {
         chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
             const activeTab = tabs[0];
-            chrome.tabs.sendMessage(activeTab.id, { sendUsers: true });
+            chrome.tabs.sendMessage(activeTab.id, { parentalControl: !parentalControl });
         });
+        chrome.storage.sync.set({ 'parentalControl': !parentalControl }, function () {
+        });
+        setParentalControl(!parentalControl)
+    }, [setParentalControl, parentalControl])
+
+    useEffect(() => {
+        localStorage.setItem('parentalControl', JSON.stringify(parentalControl))
+    }, [parentalControl])
+
+    // chrome.runtime.onMessage.addListener(
+    //     function (request, sender, sendResponse) {
+    //         if (request.users) {
+    //             localStorage.setItem('users', JSON.stringify(request.users))
+    //             setUsers(request.users)
+    //             sendResponse({ received: true });
+    //         }
+    //     }
+    // );
+
+    useEffect(() => {
+        // chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+        //     const activeTab = tabs[0];
+        //     chrome.tabs.sendMessage(activeTab.id, { sendUsers: true });
+        // });
     }, [])
 
     const userToUnfollow = useMemo(() => {
@@ -283,22 +272,27 @@ const MainPage = () => {
         }
         return handle
     }, [users])
-    useEffect(async () => {
-        if (userToUnfollow !== "") {
-            const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
-            const result = await checkFollow({ source_id: userId, screen_name: userToUnfollow.slice(1) })
-            if (!result.following) {
-                delete users[userToUnfollow]
-                setUsers({ ...users })
-            }
+
+    const deleteUnfollowedUsers = useCallback(async () => {
+        const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
+        const result = await checkFollow({ source_id: userId, screen_name: userToUnfollow.slice(1) })
+        if (!result.following) {
+            delete users[userToUnfollow]
+            setUsers({ ...users })
         }
-    }, [userToUnfollow])
+    }, [userToUnfollow, users])
+
+    useEffect(() => {
+        if (userToUnfollow !== "") {
+            deleteUnfollowedUsers()
+        }
+    }, [userToUnfollow, deleteUnfollowedUsers])
     return (
         <div>
             <HeaderContainer>
                 <Label>EmoTool</Label>
                 <Tab onClick={() => setTab(0)} style={{ borderBottom: tab === 0 ? "1px solid red" : 0 }}>Home</Tab>
-                <Tab onClick={() => setTab(1)} style={{ borderBottom: tab === 1 ? "1px solid red" : 0 }}>Filters</Tab>
+                <Tab onClick={() => setTab(1)} style={{ borderBottom: tab === 1 ? "1px solid red" : 0, whiteSpace: "nowrap" }}>Parental Control</Tab>
                 <Tab onClick={() => setTab(2)} style={{ borderBottom: tab === 2 ? "1px solid red" : 0 }}>Status</Tab>
                 <LogoutBtn onClick={logout}>Logout</LogoutBtn>
             </HeaderContainer>
@@ -310,7 +304,7 @@ const MainPage = () => {
             /></SpinnerContainer>}
             {!loading && tab === 0 && <Visualization graphTweets={duration === "week" ? TweetsByweek : duration === "month" ? TweetsByMonth : TweetsByYear} duration={duration} handleDurationChange={handleDurationChange} />}
             {tab === 1 &&
-                <Filter filters={filters} handleCheckBox={handleCheckBox} />
+                <ParentalControl parentalControl={parentalControl} handleCheckBox={handleCheckBox} />
             }
             {tab === 2 &&
                 <Status userToUnfollow={userToUnfollow} status={duration === "week" ? TweetsByweek.status : duration === "month" ? TweetsByMonth.status : TweetsByYear.status} />

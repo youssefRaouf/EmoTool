@@ -1,8 +1,12 @@
 const script = document.createElement('script')
 let tweets = JSON.parse(localStorage.getItem('tweets')) || []
-let filters = []
-
+let parentalControl = false
+const filters = ["sadness", "anger", "fear", "surprise", "disgust"]
 let users = JSON.parse(localStorage.getItem('users')) || {};
+
+chrome.storage.sync.get(['parentalControl'], function (items) {
+    parentalControl = items.parentalControl
+});
 
 const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/, 'g');
 
@@ -12,8 +16,8 @@ const httpsReg = RegExp(/(https?):\/\//, 'g');
 // Remove numbers
 const NumberRegex = RegExp(/\d+[,:]?[\.\d+]*.?/, 'g');
 
-if (localStorage.getItem('filters')) {
-    filters = JSON.parse(localStorage.getItem('filters'))
+if (localStorage.getItem('parentalControl')) {
+    parentalControl = JSON.parse(localStorage.getItem('parentalControl'))
 }
 
 const sendUsersAsMessage = () => {
@@ -26,9 +30,9 @@ chrome.runtime.onMessage.addListener(
         if (request.sendUsers) {
             sendUsersAsMessage()
         } else {
-            filters = request.filters
+            parentalControl = request.parentalControl
             hideElements()
-            localStorage.setItem('filters', JSON.stringify(filters))
+            localStorage.setItem('parentalControl', JSON.stringify(parentalControl))
         }
     }
 );
@@ -173,7 +177,7 @@ const hideElements = () => {
         let { userHandle, total_text } = cleanTweets(spans);
 
         const tweet = tweets.find((tweet) => tweet.text === total_text);
-        if (tweet && tweet.label && filters.includes(tweet.label)) {
+        if (tweet && tweet.label && parentalControl && filters.includes(tweet.label)) {
             el.style.filter = 'blur(4px)'
         } else {
             el.style.filter = 'none'

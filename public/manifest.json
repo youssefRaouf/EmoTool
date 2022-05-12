@@ -11,7 +11,8 @@
     "tabs",
     "bookmarks",
     "<all_urls>",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>",
