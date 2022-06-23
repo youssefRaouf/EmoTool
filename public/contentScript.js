@@ -2,6 +2,9 @@ const script = document.createElement('script')
 let tweets = JSON.parse(localStorage.getItem('tweets')) || []
 let filters = []
 
+chrome.storage.sync.get(['filters'], function (items) {
+    filters = items.filters || []
+});
 let users = JSON.parse(localStorage.getItem('users')) || {};
 
 const urlReg = RegExp(/(?:https?|ftp):\/\/[\n\S]+/, 'g');

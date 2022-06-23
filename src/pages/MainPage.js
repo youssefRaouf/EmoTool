@@ -112,7 +112,7 @@ const MainPage = () => {
             const result = formatDistanceToNowStrict(
                 new Date(tweet.date)
             )
-            if (!result.includes('months') && !result.includes('years')) {
+            if (!result.includes('months') && !result.includes('month') && !result.includes('years')) {
                 if (result.includes('days')) {
                     const arr = result.split(' ')
                     if (arr[0] <= 6) {
@@ -241,12 +241,16 @@ const MainPage = () => {
                 const activeTab = tabs[0];
                 chrome.tabs.sendMessage(activeTab.id, { filters });
             });
+            chrome.storage.sync.set({ 'filters': filters }, function () {
+            });
         } else {
             const newFilters = filters.filter(f => f !== val)
             setFilters([...newFilters])
             chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
                 const activeTab = tabs[0];
                 chrome.tabs.sendMessage(activeTab.id, { filters: newFilters });
+            });
+            chrome.storage.sync.set({ 'filters': newFilters }, function () {
             });
         }
     }, [setFilters, filters])
@@ -283,16 +287,20 @@ const MainPage = () => {
         }
         return handle
     }, [users])
-    useEffect(async () => {
-        if (userToUnfollow !== "") {
-            const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
-            const result = await checkFollow({ source_id: userId, screen_name: userToUnfollow.slice(1) })
-            if (!result.following) {
-                delete users[userToUnfollow]
-                setUsers({ ...users })
-            }
+    const deleteUnfollowedUsers = useCallback(async () => {
+        const userId = JSON.parse(localStorage.getItem('user')).providerData[0].uid;
+        const result = await checkFollow({ source_id: userId, screen_name: userToUnfollow.slice(1) })
+        if (!result.following) {
+            delete users[userToUnfollow]
+            setUsers({ ...users })
         }
-    }, [userToUnfollow])
+    }, [userToUnfollow, users])
+
+    useEffect(() => {
+        if (userToUnfollow !== "") {
+            deleteUnfollowedUsers()
+        }
+    }, [userToUnfollow, deleteUnfollowedUsers])
     return (
         <div>
             <HeaderContainer>
