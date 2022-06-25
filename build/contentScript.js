@@ -184,11 +184,14 @@ const hideElements = () => {
         }
     }
 }
-window.addEventListener('load', async () => {
+
+function ContentScript()
+{
     setTimeout(async () => {
 
+
         let tweetsSection = document.getElementsByClassName('r-1jgb5lz')[0]
-        console.log("Loaded")
+        console.log("In Content Script")
         const elements = document.getElementsByTagName('article')
         for (const el of elements) {
             const spans = el.getElementsByTagName('span');
@@ -232,4 +235,43 @@ window.addEventListener('load', async () => {
         };
         observer.observe(tweetsSection, config);
     }, 2000)
+}
+var CurrentUrl = "";
+window.addEventListener('load', async () => {
+
+    CurrentUrl = window.location.href;
+    console.log('In Load');
+    console.log(CurrentUrl);
+    ContentScript();
+ 
 });
+
+function addLocationObserver(callback) {
+
+  // Options for the observer (which mutations to observe)
+  const config = { attributes: false, childList: true, subtree: true }
+
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver(callback)
+
+  // Start observing the target node for configured mutations
+  observer.observe(document.body, config)
+}
+
+function observerCallback() {
+
+    var windowUrl = window.location.href;
+  if (CurrentUrl!=""&&windowUrl.startsWith('https://twitter.com')&&windowUrl != CurrentUrl) {
+       
+        console.log("In Observer: ");
+     
+        CurrentUrl = windowUrl;
+        console.log("URL Change : "+CurrentUrl)
+        ContentScript();
+      
+       
+  }
+}
+
+addLocationObserver(observerCallback)
+observerCallback()
