@@ -234,7 +234,17 @@ const MainPage = () => {
     const handleCheckBox = useCallback(event => {
         const val = event.target.value
         const check = event.target.checked
-        if (check) {
+        if (val === "parentalControl" && check) {
+            const f = ['sadness', 'anger', 'fear', 'disgust', 'surprise', 'parentalControl']
+            setFilters(f)
+            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { filters: f });
+            });
+            chrome.storage.sync.set({ 'filters': f }, function () {
+            });
+        }
+        else if (check) {
             filters.push(val)
             setFilters([...filters])
             chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {

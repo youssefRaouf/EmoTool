@@ -1,60 +1,86 @@
-import React from "react"
+import React, { useMemo } from "react"
 import "../styles/checkboxes.scss"
+import Switch from '@mui/material/Switch';
+const label = { inputProps: { 'aria-label': 'Switch demo' } };
 
 const Filter = ({ handleCheckBox, filters = [] }) => {
+  const isDisabled = useMemo(() => {
+    return filters.includes('parentalControl')
+  }, [filters])
   return (
-    <div id="grb">
-      <h1 id="example-page-main-heading">Filter Tweets</h1>
+    <div id="grb" style={{ marginTop: 20, paddingBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div style={{ fontSize: '2rem' }} >Parental Control</div>
+        <Switch
+          onChange={handleCheckBox}
+          checked={filters.includes('parentalControl')}
+          value="parentalControl"
+          {...label} />
+      </div>
       <main>
-        <div className="example-box">
-          <div>
-            <label htmlFor="check-1">Joy</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('joy')} onChange={handleCheckBox} type="checkbox" name="labels" value="joy" />
-              <span aria-hidden="true"></span>
-            </div>
+        <div style={{ width: '33%', maxWidth: '25rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Joy</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('joy')}
+              value="joy"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-2">Sadness</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('sadness')} onChange={handleCheckBox} type="checkbox" name="labels" value="sadness" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Sadness</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('sadness')}
+              value="sadness"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-3">Anger</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('anger')} onChange={handleCheckBox} type="checkbox" name="labels" value="anger" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Anger</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('anger')}
+              value="anger"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-4">Disgust</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('disgust')} onChange={handleCheckBox} type="checkbox" name="labels" value="disgust" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Disgust</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('disgust')}
+              value="disgust"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-5">Fear</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('fear')} onChange={handleCheckBox} type="checkbox" name="labels" value="fear" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Fear</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('fear')}
+              value="fear"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-6">Surprise</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('surprise')} onChange={handleCheckBox} type="checkbox" name="labels" value="surprise" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Surprise</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('surprise')}
+              value="surprise"
+              {...label} />
           </div>
-          <div>
-            <label htmlFor="check-7">Neutral</label>
-            <div className="checkbox-wrapper">
-              <input checked={filters.includes('neutral')} onChange={handleCheckBox} type="checkbox" name="labels" value="neutral" />
-              <span aria-hidden="true"></span>
-            </div>
+          <div style={{ width: 130, display: 'flex', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '2rem' }}>Neutral</label>
+            <Switch
+              disabled={isDisabled}
+              onChange={handleCheckBox}
+              checked={filters.includes('neutral')}
+              value="neutral"
+              {...label} />
           </div>
         </div>
       </main>
